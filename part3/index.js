@@ -27,6 +27,21 @@ const noteSchema = new mongoose.Schema({
 
 const Note = mongoose.model('Note', noteSchema)
 
+const notes = [
+    {
+        "content": "HTML is Easy",
+        "important": "true"
+    },
+    {
+        "content": "Mongoose make use of mongo easy",
+        "important": "true"
+    },
+    {
+        "content": "Callback-functions suck",
+        "important": "true"
+    }
+]
+
 const requestLogger = (request, response, next) => {
     console.log('Method:', request.method)
     console.log('Path: ', request.path)
