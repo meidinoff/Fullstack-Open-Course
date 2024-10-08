@@ -1,3 +1,5 @@
+import dotenv from 'dotenv'
+dotenv.config()
 import mongoose from "mongoose";
 
 mongoose.set('strictQuery', false)
@@ -27,4 +29,5 @@ noteSchema.set('toJSON', {
     }
 })
 
-module.exports = mongoose.model('Note', noteSchema)
+const Note = mongoose.model('Note', noteSchema)
+export default Note
