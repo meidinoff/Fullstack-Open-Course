@@ -1,5 +1,7 @@
-import dotenv from 'dotenv'
-dotenv.config()
+import app from './app.js'
+import config from './utils/config.js'
+import logger from './utils/logger.js'
+
 import express from 'express'
 import cors from 'cors'
 import Note from './models/note.js'
@@ -94,7 +96,7 @@ const errorHandler = (error, request, response, next) => {
 
 app.use(errorHandler)
 
-const PORT = process.env.PORT
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
+
+app.listen(config.PORT, () => {
+    logger.info(`Server running on port ${config.PORT}`)
 })
