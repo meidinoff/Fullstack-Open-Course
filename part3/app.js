@@ -1,11 +1,12 @@
-import config from './utils/config'
+import config from './utils/config.js'
 import express from 'express'
+import 'express-async-errors'
 const app = express()
 
 import cors from 'cors'
-import notesRouter from './controllers/notes'
-import middleware from './utils/middleware'
-import logger from './utils/logger'
+import notesRouter from './controllers/notes.js'
+import middleware from './utils/middleware.js'
+import logger from './utils/logger.js'
 import mongoose from 'mongoose'
 
 mongoose.set('strictQuery', false)
