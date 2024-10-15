@@ -1,6 +1,12 @@
-const { test, describe } = require('node:test')
+const { test, after, describe } = require('node:test')
 const assert = require('node:assert')
+const mongoose = require('mongoose')
+const supertest = require('supertest')
 const listHelper = require('../utils/list_helper.js')
+const blogRouter = require('../controllers/blog_posts.js')
+const app = require('../app.js')
+
+const api = supertest(app)
 
 test('dummy returns one', () => {
     const blogs = []
@@ -107,4 +113,73 @@ describe('total likes', () => {
         }
         assert.deepStrictEqual(result, answer)
     })
+})
+
+test('get correct number of blog posts', async () => {
+    const getRequest = await api
+        .get('/api/blogs')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+    
+    assert.strictEqual(getRequest.body.length, 5)
+})
+
+test('id is named id', async () => {
+    const getRequest = await api.get('/api/blogs')
+
+    const hasId = getRequest.body.every(post => Boolean(post.id))
+
+    assert.strictEqual(hasId, true)
+})
+
+test('HTTP POST request successful', async () => {
+    const newNote = {
+        title: "This is a POST request test",
+        author: "Max Eidinoff",
+        url: "random",
+        likes: 14
+    }
+
+    const initialGet = await api.get('/api/blogs')
+
+    await api.post('/api/blogs').send(newNote)
+
+    const updatedGet = await api.get('/api/blogs')
+
+    assert.strictEqual(updatedGet.body.length, initialGet.body.length + 1)
+    assert.strictEqual(updatedGet.body[updatedGet.body.length - 1].title, newNote.title)
+})
+
+test('likes default to 0 if missing', async () => {
+    const newNote = {
+        title: "This blog post has no likes property",
+        author: "Max Eidinoff",
+        url: "idk"
+    }
+
+    await api.post('/api/blogs').send(newNote)
+    const getRequest = await api.get('/api/blogs')
+
+    assert.strictEqual(getRequest.body[getRequest.body.length - 1].likes, 0)
+})
+
+test.only('status code 400 Bad Request if missing title or url', async () => {
+    const initialGetRequest = await api.get('/api/blogs')
+    
+    const newNote = {
+        author: "Max Eidinoff"
+    }
+
+    await api
+        .post('/api/blogs')
+        .send(newNote)
+        .expect(400)
+    
+    const newGetRequest = await api.get('/api/blogs')
+
+    assert.strictEqual(initialGetRequest.body.length, newGetRequest.body.length)
+})
+
+after(async () => {
+    await mongoose.connection.close()
 })

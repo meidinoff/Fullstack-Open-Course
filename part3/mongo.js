@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 if (process.argv.length<3) {
     console.log('give password as argument')
