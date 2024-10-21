@@ -7,6 +7,8 @@ import cors from 'cors'
 import notesRouter from './controllers/notes.js'
 import middleware from './utils/middleware.js'
 import logger from './utils/logger.js'
+import usersRouter from './controllers/users.js'
+import loginRouter from './controllers/login.js'
 import mongoose from 'mongoose'
 
 mongoose.set('strictQuery', false)
@@ -26,6 +28,8 @@ app.use(express.static('dist'))
 app.use(express.json())
 app.use(middleware.requestLogger)
 
+app.use('/api/login', loginRouter)
+app.use('/api/users', usersRouter)
 app.use('/api/notes', notesRouter)
 
 app.use(middleware.unknownEndpoint)

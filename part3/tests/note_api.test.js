@@ -1,8 +1,10 @@
-import { test, after, beforeEach } from 'node:test'
+import { test, after, beforeEach, describe } from 'node:test'
 import assert from 'assert'
 import mongoose from 'mongoose'
 import supertest from 'supertest'
+import bcrypt from 'bcrypt'
 import testHelper from './test_helper.js'
+import User from '../models/user.js'
 import Note from '../models/note.js'
 import app from '../app.js'
 
@@ -44,7 +46,7 @@ test('the first note is about HTTP methods', async () => {
     assert(contents.includes('HTML is easy'))
 })
 
-test.only('a valid note can be added ', async () => {
+test('a valid note can be added ', async () => {
     const newNote = {
         content: 'async/await simplifies making async calls',
         important: true,
@@ -63,7 +65,7 @@ test.only('a valid note can be added ', async () => {
     assert(contents.includes('async/await simplifies making async calls'))
 })
 
-test.only('note without content is not added', async () => {
+test('note without content is not added', async () => {
     const newNote = {
         important: true
     }
@@ -105,6 +107,60 @@ test('a note can be deleted', async () => {
     assert(!contents.includes(noteToDelete.content))
 
     assert.strictEqual(notesAtEnd.length, testHelper.initialNotes.length - 1)
+})
+
+describe.only('when there is initially one user in db', () => {
+    beforeEach(async () => {
+        await User.deleteMany({})
+
+        const passwordHash = await bcrypt.hash('sekret', 10)
+        const user = new User({ username: 'root', passwordHash })
+
+        await user.save()
+    })
+
+    test.only('creation succeeds with a fresh username', async () => {
+        const usersAtStart = await testHelper.usersInDb()
+
+        const newUser = {
+            username: 'mluukkai',
+            name: 'Matti Luukkainen',
+            password: 'salainen',
+        }
+
+        await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const usersAtEnd = await testHelper.usersInDb()
+        assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1)
+
+        const usernames = usersAtEnd.map(u => u.username)
+        assert(usernames.includes(newUser.username))
+    })
+
+    test.only('creation fails with proper statuscode and message if username already taken', async () => {
+        const usersAtStart = await testHelper.usersInDb()
+
+        const newUser = {
+            username: 'root',
+            name: 'Superuser',
+            password: 'salainen',
+        }
+
+        const result = await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(400)
+            .expect('Content-Type', /application\/json/)
+
+        const usersAtEnd = await testHelper.usersInDb()
+        assert(result.body.error.includes('expected `username` to be unique'))
+
+        assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+    })
 })
 
 after(async () => {
