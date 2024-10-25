@@ -1,10 +1,9 @@
 import {useState} from 'react'
 import loginService from '../services/login'
 
-const Login = ({  }) => {
+const Login = ({ userState }) => {
     const [username, setUsername] = useState([])
     const [password, setPassword] = useState([])
-    const [user, setUser] = useState([])
 
     const handleLogin = async event => {
         event.preventDefault()
@@ -18,7 +17,7 @@ const Login = ({  }) => {
                 'loggedBlogUser', JSON.stringify(user)
             )
 
-            setUser(user)
+            userState(user)
             setUsername('')
             setPassword('')
         } catch (exception) {

@@ -5,9 +5,7 @@ import blogService from './services/blogs'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [username, setUsername] = useState([])
-  const [password, setPassword] = useState([])
-  const [user, setUser] = useState([])
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -17,7 +15,12 @@ const App = () => {
 
   return (
     <div>
-      <Login key={user} />
+      {user === null ? 
+        <Login userState={setUser} /> : 
+        <div>
+          <p>{user.name} logged-in</p>
+        </div>
+      }
       <h2>blogs</h2>
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
