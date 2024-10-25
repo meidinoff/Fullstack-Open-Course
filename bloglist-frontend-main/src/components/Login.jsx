@@ -1,9 +1,11 @@
 import {useState} from 'react'
 import loginService from '../services/login'
+import blogService from '../services/blogs'
 
 const Login = ({ userState }) => {
     const [username, setUsername] = useState([])
     const [password, setPassword] = useState([])
+    const [errorMessage, setErrorMessage] = useState(null)
 
     const handleLogin = async event => {
         event.preventDefault()
@@ -17,6 +19,7 @@ const Login = ({ userState }) => {
                 'loggedBlogUser', JSON.stringify(user)
             )
 
+            blogService.setToken(user.token)
             userState(user)
             setUsername('')
             setPassword('')
@@ -41,6 +44,7 @@ const Login = ({ userState }) => {
                     <input id="password" type="password" onChange={({ target }) => setPassword(target.value)} />
                 </div>
                 <button type="submit">login</button>
+                {errorMessage === null ? null : <p style={{ color: 'red', fontWeight: 'bold' }}>{errorMessage}</p> }
             </form>
         </div>
     )
